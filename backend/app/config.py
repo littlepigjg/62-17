@@ -9,10 +9,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 CONFIG_DIR = BASE_DIR / "config"
 LOGS_DIR = BASE_DIR / "logs"
 TEMPLATES_DIR = BASE_DIR / "templates"
+DATA_DIR = BASE_DIR / "data"
 
 CONFIG_DIR.mkdir(exist_ok=True)
 LOGS_DIR.mkdir(exist_ok=True)
 TEMPLATES_DIR.mkdir(exist_ok=True)
+DATA_DIR.mkdir(exist_ok=True)
 
 
 class ServerConfig(BaseModel):
@@ -39,6 +41,10 @@ class AppSettings(BaseModel):
     ssh_timeout: int = 30
     max_concurrent_tasks: int = 20
     log_retention_days: int = 30
+
+    @property
+    def data_dir(self) -> str:
+        return str(DATA_DIR)
 
     @classmethod
     def load(cls, config_path: Optional[str] = None) -> "AppSettings":

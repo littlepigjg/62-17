@@ -74,3 +74,99 @@ export interface ScriptExecuteRequest {
   args?: string[];
   timeout?: number;
 }
+
+import type {
+  PositionData as _PositionData,
+  CRDTCharData as _CRDTCharData,
+  CRDTOperationData as _CRDTOperationData,
+  CRDTDocumentData as _CRDTDocumentData,
+} from '../lib/crdt';
+
+export type PositionData = _PositionData;
+export type CRDTCharData = _CRDTCharData;
+export type CRDTOperationData = _CRDTOperationData;
+export type CRDTDocumentData = _CRDTDocumentData;
+
+export interface PresenceData {
+  user_id: string;
+  user_name: string;
+  user_color: string;
+  cursor?: { offset: number };
+  selection?: { start: number; end: number };
+  last_active: string;
+}
+
+export interface ChatMessageData {
+  id: string;
+  channel_id: string;
+  user_id: string;
+  user_name: string;
+  user_color: string;
+  content: string;
+  timestamp: string;
+  mentions: string[];
+  is_system: boolean;
+}
+
+export interface NotificationData {
+  id: string;
+  user_id: string;
+  type: string;
+  title: string;
+  content: string;
+  timestamp: string;
+  read: boolean;
+  related_doc_id?: string;
+  related_message_id?: string;
+}
+
+export interface HistorySnapshotData {
+  version: number;
+  timestamp: string;
+  user_id: string;
+  user_name: string;
+  content: string;
+  operations?: CRDTOperationData[];
+}
+
+export interface DiffChangeData {
+  type: 'insert' | 'delete' | 'replace';
+  index: number;
+  char: string;
+  user_id: string;
+  user_name: string;
+  timestamp: string;
+}
+
+export type PermissionLevel = 'owner' | 'editor' | 'commenter' | 'viewer';
+
+export interface PermissionData {
+  resource_type: string;
+  resource_id: string;
+  user_id: string;
+  permission: PermissionLevel;
+  granted_at: string;
+  granted_by: string;
+}
+
+export interface CollabSessionState {
+  doc_id: string;
+  document: CRDTDocumentData;
+  text: string;
+  online_users: PresenceData[];
+  latest_op_timestamp: string;
+  permission?: PermissionLevel;
+}
+
+export type CollabMessageType =
+  | 'session_state'
+  | 'operation'
+  | 'presence'
+  | 'user_joined'
+  | 'user_left'
+  | 'chat'
+  | 'chat_history'
+  | 'notification'
+  | 'operations_batch'
+  | 'error'
+  | 'pong';

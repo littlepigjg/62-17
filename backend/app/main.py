@@ -6,7 +6,9 @@ from .api.servers import router as servers_router
 from .api.executor import router as executor_router
 from .api.templates import router as templates_router
 from .api.logs import router as logs_router
+from .api.collab import router as collab_router
 from .websocket import handle_websocket
+from .collab.ws import handle_collab_websocket
 from .config import settings
 
 app = FastAPI(
@@ -37,11 +39,17 @@ app.include_router(servers_router, prefix="/api")
 app.include_router(executor_router, prefix="/api")
 app.include_router(templates_router, prefix="/api")
 app.include_router(logs_router, prefix="/api")
+app.include_router(collab_router, prefix="/api")
 
 
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
     await handle_websocket(websocket)
+
+
+@app.websocket("/ws/collab")
+async def collab_websocket_endpoint(websocket: WebSocket):
+    await handle_collab_websocket(websocket)
 
 
 def main():

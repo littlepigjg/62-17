@@ -27,6 +27,7 @@ import {
   ThunderboltOutlined,
   CalendarOutlined,
   SearchOutlined,
+  TeamOutlined,
 } from '@ant-design/icons';
 import { templatesApi } from '@/services/api';
 import { useAppStore } from '@/store';
@@ -36,7 +37,11 @@ const { TextArea } = Input;
 const { Option } = Select;
 const { Text, Title, Paragraph } = Typography;
 
-const ScriptLibrary: React.FC = () => {
+interface ScriptLibraryProps {
+  onCollaborate?: (tpl: ScriptTemplate) => void;
+}
+
+const ScriptLibrary: React.FC<ScriptLibraryProps> = ({ onCollaborate }) => {
   const { message } = App.useApp();
   const { templates, setTemplates, addTemplate, updateTemplate, removeTemplate } = useAppStore();
 
@@ -211,6 +216,21 @@ const ScriptLibrary: React.FC = () => {
                       icon={<EditOutlined />}
                       onClick={() => openEdit(tpl)}
                     />
+                    <Tooltip title="协作编辑">
+                      <Button
+                        size="small"
+                        type="text"
+                        icon={<TeamOutlined />}
+                        onClick={e => {
+                          e.stopPropagation();
+                          if (onCollaborate) {
+                            onCollaborate(tpl);
+                          } else {
+                            message.info('协作编辑功能');
+                          }
+                        }}
+                      />
+                    </Tooltip>
                   </Space>
                 }
               >
@@ -335,16 +355,31 @@ const ScriptLibrary: React.FC = () => {
           <Space>
             <Button onClick={() => setViewing(null)}>关闭</Button>
             {viewing && (
-              <Button
-                type="primary"
-                icon={<EditOutlined />}
-                onClick={() => {
-                  openEdit(viewing);
-                  setViewing(null);
-                }}
-              >
-                编辑此模板
-              </Button>
+              <>
+                <Button
+                  icon={<TeamOutlined />}
+                  onClick={() => {
+                    if (onCollaborate) {
+                      onCollaborate(viewing);
+                      setViewing(null);
+                    } else {
+                      message.info('协作编辑功能');
+                    }
+                  }}
+                >
+                  协作编辑
+                </Button>
+                <Button
+                  type="primary"
+                  icon={<EditOutlined />}
+                  onClick={() => {
+                    openEdit(viewing);
+                    setViewing(null);
+                  }}
+                >
+                  编辑此模板
+                </Button>
+              </>
             )}
           </Space>
         }

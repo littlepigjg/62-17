@@ -1,22 +1,27 @@
-import React, { useEffect } from 'react';
-import { Layout, Tabs, Badge } from 'antd';
+import React, { useEffect, useState } from 'react';
+import { Layout, Tabs, Badge, Modal } from 'antd';
 import {
   DesktopOutlined,
   CodeOutlined,
   FileTextOutlined,
   HistoryOutlined,
+  TeamOutlined,
 } from '@ant-design/icons';
 import MachineManagement from './components/MachineManagement';
 import TerminalPanel from './components/TerminalPanel';
 import ScriptLibrary from './components/ScriptLibrary';
 import LogViewer from './components/LogViewer';
+import CollaborativePage from './components/CollaborativePage';
+import NotificationCenter from './components/NotificationCenter';
 import { useAppStore } from './store';
 import { wsService } from './services/websocket';
+import type { ScriptTemplate } from './types';
 
 const { Header, Content } = Layout;
 
 const App: React.FC = () => {
   const { currentTab, setCurrentTab, handleStreamMessage, activeTasks } = useAppStore();
+  const [collaboratingTpl, setCollaboratingTpl] = useState<ScriptTemplate | null>(null);
 
   useEffect(() => {
     const unsub = wsService.onMessage(handleStreamMessage);
@@ -57,7 +62,11 @@ const App: React.FC = () => {
           脚本库
         </span>
       ),
-      children: <ScriptLibrary />,
+      children: (
+        <ScriptLibrary
+          onCollaborate={(tpl) => setCollaboratingTpl(tpl)}
+        />
+      ),
     },
     {
       key: 'logs',
@@ -73,8 +82,19 @@ const App: React.FC = () => {
 
   return (
     <Layout className="app-layout">
-      <Header className="app-header">
-        <h1>🚀 远程命令执行与脚本管理平台</h1>
+      <Header
+        className="app-header"
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '0 24px',
+        }}
+      >
+        <h1 style={{ margin: 0 }}>🚀 远程命令执行与脚本管理平台</h1>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <NotificationCenter />
+        </div>
       </Header>
       <Content className="app-content">
         <Tabs
@@ -84,6 +104,29 @@ const App: React.FC = () => {
           size="large"
         />
       </Content>
+
+      <Modal
+        open={!!collaboratingTpl}
+        onCancel={() => setCollaboratingTpl(null)}
+        title={null}
+        footer={null}
+        width="98vw"
+        style={{ top: 20, padding: 0 }}
+        bodyStyle={{ padding: 0, height: '90vh' }}
+        destroyOnClose
+        maskClosable
+        zIndex={2000}
+      >
+        {collaboratingTpl && (
+          <CollaborativePage
+            docId={collaboratingTpl.id}
+            docName={collaboratingTpl.name}
+            interpreter={collaboratingTpl.interpreter}
+            onBack={() => setCollaboratingTpl(null)}
+            initialPermission="owner"
+          />
+        )}
+      </Modal>
     </Layout>
   );
 };
